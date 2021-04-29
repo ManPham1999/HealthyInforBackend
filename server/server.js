@@ -21,20 +21,11 @@ const port = process.env.PORT || 5000;
 
 // mongoose connect to db
 mongoose
-  .connect(
-    mongoURI,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
-    },
-    // callback connect on port server
-    () => {
-      app.listen(port, () => {
-        console.log("connect success full " + port);
-      });
-    }
-  )
+  .connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+  })
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.log("TCL: err", err));
 
@@ -55,9 +46,17 @@ app.use("/api/user", require("./routers/api/Users/index"));
 //socket.io
 
 io.on("connection", (socket) => {
-  socket.on("challenge mode", (msg) => {
-    io.emit("challenge mode", msg);
+  console.log(`user ${socket.id} connected`);
+  socket.on("chat message", (msg) => {
+    console.log(`data of ${socket.id}: ` +msg?.avatar);
+    io.emit("chat message", msg);
+  });
+  socket.on("disconnect", () => {
+    console.log(`user ${socket.id} disconnected`);
   });
 });
 
+http.listen(port, () => {
+  console.log("connect success full " + port);
+});
 module.exports = app;
